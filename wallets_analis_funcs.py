@@ -22,7 +22,6 @@ def make_unique_wallets_file_small():
     global is_processing
     global processing_lock
     with lock_read:
-        print(1)
         with processing_lock:
         # Проверяем, выполняется ли уже данный участок кода
             if is_processing:
@@ -120,13 +119,10 @@ def process_wallets_group_ddf(wallets, transactions_ddf):
     return wallet_info_ddf
 
 def get_wallets_info(transactions_ddf):
-
     print('Агрегация данных по кошелькам')
     transactions_ddf = transactions_ddf.groupby(['Transaction_id', 'Wallet_id', 'Btc_block_time_price', 'Block_time']).agg({'Amount': 'sum', 'Transactions_Count': 'sum'}).reset_index()
-
     transactions_ddf.loc[:, 'Date'] = dd.to_datetime(transactions_ddf['Block_time'], unit='s')
     transactions_ddf = transactions_ddf.sort_values(by=['Wallet_id', 'Date'])
-
     transactions_ddf['Time_diff'] = transactions_ddf.groupby('Wallet_id')['Date'].diff()
     transactions_ddf['Time_diff_days'] = transactions_ddf['Time_diff'].dt.total_seconds() / (24 * 3600)
     # Разделяем транзакции на продажи и покупки
@@ -183,7 +179,6 @@ def remove_processed_wallets(wallets_list, WALLETS_FILE_DIR, client, file_path='
             print(f'До удаления, кол-во кошельков: {len(unique_wallets_df)}')
             filtered_df = unique_wallets_df[~unique_wallets_df['Wallet_id'].isin(wallets_list)]
             print(f'После {len(filtered_df)}')
-
             if filtered_df.index.size > 0:
                 print('Сохранение обновленного DataFrame')
                 os.remove(file_path)
