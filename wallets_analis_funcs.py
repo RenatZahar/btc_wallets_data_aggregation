@@ -42,12 +42,7 @@ def init(MEMORY_LIMIT, THREADS_PER_WORKER, WORKERS, DATA_FILE_DIR, NPARTITIONS):
                  'distributed.worker.memory.pause': 0.75,
                  'distributed.worker.memory.terminate': 0.8,
                  'distributed.worker.timeout.interval': 500})
-    
-    # dask.config.set({'distributed.worker.memory.target': 0.1,
-    #              'distributed.worker.memory.spill': 0.5,
-    #              'distributed.worker.memory.pause': 0.75,
-    #              'distributed.worker.memory.terminate': 0.8,
-    #              'distributed.worker.timeout.interval': 500})
+
     
     client = Client(memory_limit=MEMORY_LIMIT, threads_per_worker=THREADS_PER_WORKER, n_workers=WORKERS, local_directory='I:/dask-temp')#, memory_limit=MEMORY_LIMIT, threads_per_worker=THREADS_PER_WORKER,  memory_limit='2GB', memory_limit='17GB', memory_limit='50GB',  threads_per_worker=1,
     client.run(lambda: gc.collect())
@@ -212,7 +207,7 @@ def remove_processed_wallets(wallets_list, WALLETS_FILE_DIR, client, file_path='
                     if file != 'all_wallets_df.parquet' and file.endswith('.parquet'):
                         os.remove(file_path)
                         print(f'Файл {file_path} удален')
-                                        
+
         else:
             print(f'Файл {file_path} не найден.')
 
