@@ -34,7 +34,6 @@ def make_unique_wallets_file_small():
             df = df.iloc[:100]
             df.to_parquet(UNIQ_WALLETS_FILE_DIR)
 
-
 def init(MEMORY_LIMIT, THREADS_PER_WORKER, WORKERS, DATA_FILE_DIR, NPARTITIONS):
     dask.config.set({'distributed.worker.memory.target': 0.1,
                  'distributed.worker.memory.spill': 0.35,
@@ -76,7 +75,6 @@ def get_unique_wallets(data_files, WALLETS_IN_ITERATION, NPARTITIONS, PARTITION_
             unique_wallets = unique_wallets.reset_index(drop=True)
             unique_wallets = unique_wallets.to_frame(name='Wallet_id')
             unique_wallets.to_parquet(file_path, engine='fastparquet')
-
         if not unique_wallets:
             unique_wallets = pd.read_parquet(file_path)
 
@@ -88,14 +86,11 @@ def get_unique_wallets(data_files, WALLETS_IN_ITERATION, NPARTITIONS, PARTITION_
         batches = [unique_wallets_list[i:i + WALLETS_IN_ITERATION] for i in range(0, len(unique_wallets_list), WALLETS_IN_ITERATION)]
         return batches
 
-
-
 def filter_wallets(df, wallets):
     return df[df['Wallet_id'].isin(wallets)]
 
 def process_batch(wallets_batch, txs_ddf, FILES_IN_ITERATION, NPARTITIONS, PARTITION_SIZE, WORKERS):
     group_wallets_info = process_wallet_group(wallets_batch, txs_ddf, FILES_IN_ITERATION, NPARTITIONS, PARTITION_SIZE, WORKERS)
-    # Дополнительные операции, если они необходимы
     return group_wallets_info
 
 def process_wallets_group(wallets_group, transactions_ddf):
@@ -106,7 +101,6 @@ def process_wallet_group(wallets, ddf, FILES_IN_ITERATION, NPARTITIONS, PARTITIO
     filtered_ddf = filter_wallets(ddf, wallets)
     filtered_ddf = filtered_ddf.repartition(partition_size=PARTITION_SIZE)
     wallets_groups = np.array_split(wallets, WORKERS)
-    
     wallets_groups = [group.tolist() for group in wallets_groups]
     results = [dask.delayed(process_wallets_group_ddf)(group, filtered_ddf) for group in wallets_groups]
     final_result_ddf = dask.compute(*results)
@@ -136,7 +130,7 @@ def get_wallets_info(transactions_ddf):
         'Time_diff_days': 'mean',
         'Btc_block_time_price': 'mean'
     })
-    print(wallets_stats.head())
+
     # Вычисление дополнительных статистик
     wallets_stats['Avg_sell_days'] = sells.groupby('Wallet_id')['Time_diff_days'].mean().round(2)
     wallets_stats['Avg_buy_days'] = buys.groupby('Wallet_id')['Time_diff_days'].mean().round(2)
@@ -202,7 +196,6 @@ def remove_processed_wallets(wallets_list, WALLETS_FILE_DIR, client, file_path='
                     if file != 'all_wallets_df.parquet' and file.endswith('.parquet'):
                         os.remove(file_path)
                         print(f'Файл {file_path} удален')
-
         else:
             print(f'Файл {file_path} не найден.')
 
